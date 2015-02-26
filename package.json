@@ -1,0 +1,51 @@
+{
+  "name": "jl-sequencer",
+  "version": "1.0.0",
+  "description": "An educational step sequencer",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/joeLepper/jl-sequencer"
+  },
+  "keywords": [
+    "step",
+    "sequencer",
+    "sequencer",
+    "educational",
+    "rhythm"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joeLepper/jl-sequencer/issues"
+  },
+  "homepage": "https://github.com/joeLepper/jl-sequencer",
+  "dependencies": {
+    "beat-scheduler": "^1.0.0",
+    "nee": "^1.1.0",
+    "react": "^0.12.2"
+  },
+  "devDependencies": {
+    "browserify": "^8.1.1",
+    "gulp": "^3.8.10",
+    "express": "^4.11.2",
+    "gulp-livereload": "^3.6.0",
+    "gulp-plumber": "^0.6.6",
+    "gulp-sourcemaps": "^1.3.0",
+    "gulp-util": "^3.0.3",
+    "socket.io": "^1.3.4",
+    "socket.io-client": "^1.3.4",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.0.0",
+    "vinyl-transform": "^1.0.0",
+    "watchify": "^2.3.0"
+  },
+  "author": {
+    "name": "Joe Lepper",
+    "email": "josephlepper@gmail.com",
+    "url": "http://joelepper.com"
+  }
+}
