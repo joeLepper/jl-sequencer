@@ -3,11 +3,6 @@ Sequencer
 
 An educational sequencer for use learning about timing audio visual effects.
 
-TODO BEFORE PUBLISHING
-----------------------
-
-This sequencer probably shouldn't know about how to play a sample, It should just listen to ticks and turn them into beats. A beat event should probably publish an array which lists booleans for each sample or glitch to invoke.
-
 Installation
 ------------
 
@@ -39,6 +34,10 @@ var initialBpm = 120
 
 react.renderComponent(sequencer(props), container)
 ```
+
+An example is available by cloning this repo.
+
+Simply say `gulp` and point your browser at `localhost:3000`.
 
 Properties
 ----------
