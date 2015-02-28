@@ -16,13 +16,10 @@ A sequencer is instantiated with a handful of properties.
 ``` javascript
 var sequencer = require('jl-sequencer')
   , Scheduler = require('beat-scheduler')
-  , socket = require('socket.io-client')
   , ee = require('nee')()
 
 var initialBpm = 120
   , container = document.querySelector('.sequencer')
-  , io = socket()
-  , ac = new AudioContext()
   , clock = Scheduler(ac, { ee: ee, bpm: initialBpm})
   , props = (
       { beats: 16
@@ -35,9 +32,9 @@ var initialBpm = 120
 react.renderComponent(sequencer(props), container)
 ```
 
-An example is available by cloning this repo.
+An example is available by cloning this repo (`git clone https://github.com/joeLepper/jl-sequencer.git`).
 
-Simply say `gulp` and point your browser at `localhost:3000`.
+Start `gulp` and point your browser at `localhost:3000`.
 
 Properties
 ----------
