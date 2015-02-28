@@ -27,22 +27,56 @@ var react = require('react')
   , bars = 4
   , barLength = 4
   , beats = bars * barLength
+  , audioSrc = 'TR808WAV'
+  , samples = {}
 
 
 window.addEventListener('load', function (e) {
-  var sequencerContainer = document.querySelector('.sequencer')
+  var socketId
+    , sequencerContainer = document.querySelector('.sequencer')
     , clock = Scheduler(ac, { ee: ee, bpm: initialBpm})
     , sequenceProps = (
-        { audioSrc: 'TR808WAV'
-        , clock: clock
+        { clock: clock
         , rows: rows
         , beats: beats
         , initialBpm: initialBpm
-        , ee: ee
-        , ac: ac
-        , io: io
         }
       )
 
+  machine.on('register-row', function (eventName) {
+    loadSample(eventName)
+
+    function loadSample (sampleName) {
+      var request = new XMLHttpRequest()
+      request.open('GET', audioSrc + '/' + sampleName, true)
+      request.responseType = 'arraybuffer'
+      request.onload = function () {
+        ac.decodeAudioData(request.response, function decodeResponse (buffer) {
+          samples[eventName] = buffer
+        }, onError)
+      }
+      request.send()
+    }
+    function onError (err) { throw(err) }
+  })
+
+  machine.on('schedule', function (events) {
+    events.forEach(function (evt, index) {
+      io.emit('glitch', [evt.state, index])
+      if (evt.state) setSample(evt.beat, evt.name)
+    })
+  })
   react.renderComponent(machine(sequenceProps), sequencerContainer)
+  io.on('init-ack', function (id) {
+    socketId = id
+    clock.play()
+  })
+  io.emit('init')
 })
+
+function setSample (time, name) {
+  var source = ac.createBufferSource()
+  source.buffer = samples[name]
+  source.connect(ac.destination)
+  source.start(time)
+}

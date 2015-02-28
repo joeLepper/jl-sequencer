@@ -1,22 +1,19 @@
 var react = require('react')
   , d = react.DOM
   , row = require('./row')
+  , ee = require('nee')()
 
 module.exports = react.createClass(
   { componentWillMount: function () {
       var self = this
-        , ac = self.props.ac
-        , ee = self.props.ee
         , clock = self.props.clock
-        , scheduledSamples = {}
+        , scheduledEvents = {}
         , scheduled = false
-        , samples = {}
-        , io = self.props.io
         , currentBeat = 15
         , nextBeat = 0
         , lastBeat
 
-      ee.on('next-tick', function (beat) {
+      clock.on('next-tick', function (beat) {
         if (lastBeat !== beat.lastBeat) {
           scheduled = false
           lastBeat = beat.lastBeat
@@ -27,35 +24,25 @@ module.exports = react.createClass(
         }
 
         if (!scheduled && beat.nextBeat < beat.lookahead) {
-          Object.keys(scheduledSamples).forEach(function (sampleName, index) {
-            if (scheduledSamples[sampleName][nextBeat]) {
-              io.emit('glitch', [true, index])
-              setSample(beat.nextBeat, sampleName)
-            } else io.emit('glitch', [false, index])
+          var beats = []
+          Object.keys(scheduledEvents).forEach(function (eventName, index) {
+            var evt = (
+                  { beat: beat.nextBeat
+                  , name: eventName
+                  , state: scheduledEvents[eventName][nextBeat]
+                  }
+                )
+
+            beats[index] = evt
           })
+          ee.emit('schedule', [beats])
           scheduled = true
         }
       })
-      ee.on('remove-row', function (sampleName) { delete scheduleNotes[sampleName] })
-      ee.on('register-row', function (sampleName) {
-        if (self.props.audioSrc) loadSample(sampleName)
-        scheduledSamples[sampleName] = []
-
-        function loadSample (url) {
-          var request = new XMLHttpRequest()
-          request.open('GET', self.props.audioSrc + '/' + url, true)
-          request.responseType = 'arraybuffer'
-          request.onload = function () {
-            ac.decodeAudioData(request.response, function decodeResponse (buffer) {
-              samples[sampleName] = buffer
-            }, onError)
-          }
-          request.send()
-        }
-        function onError (err) { throw(err) }
-      })
-      ee.on('note-button-click', function (column, row, sampleName) {
-        scheduledSamples[sampleName][column] = !scheduledSamples[sampleName][column]
+      ee.on('register-row', function (eventName) { scheduledEvents[eventName] = [] })
+      ee.on('remove-row', function (eventName) { delete scheduleNotes[eventName] })
+      ee.on('note-button-click', function (column, row, eventName) {
+        scheduledEvents[eventName][column] = !scheduledEvents[eventName][column]
       })
       ee.on('bpm-change', function (bpm) {
         self.setState({ bpm: bpm })
@@ -65,18 +52,6 @@ module.exports = react.createClass(
         self.setState({ swing: swing })
         clock.changeSwing(swing)
       })
-      io.on('init-ack', function (socketId) {
-        self.setState({ socketId: socketId })
-        clock.play()
-      })
-      io.emit('init')
-
-      function setSample (time, name) {
-        var source = ac.createBufferSource()
-        source.buffer = samples[name]
-        source.connect(ac.destination)
-        source.start(time)
-      }
     }
   , getInitialState: function () {
       var self = this
@@ -90,10 +65,10 @@ module.exports = react.createClass(
     }
   , render: function () {
       var self = this
-        , controls = self.props.rows.map(function (sampleName, index) {
+        , controls = self.props.rows.map(function (eventName, index) {
             return row(
-              { sampleName: sampleName
-              , ee: self.props.ee
+              { eventName: eventName
+              , ee: ee
               , row: index
               , currentBeat: self.state.currentBeat
               , numberOfBeats: self.props.beats
@@ -110,9 +85,7 @@ module.exports = react.createClass(
                   , max: 1200
                   , value: self.state.bpm
                   , step: 0.25
-                  , onChange: function (e) {
-                      self.props.ee.emit('bpm-change', [e.target.value])
-                    }
+                  , onChange: function (e) { ee.emit('bpm-change', [e.target.value]) }
                   }
                 )
               )
@@ -127,10 +100,7 @@ module.exports = react.createClass(
                   , max: 1
                   , value: self.state.swing
                   , step: 0.01
-                  , onChange: function (e) {
-                      console.log(e.target.value)
-                      self.props.ee.emit('swing-change', [e.target.value])
-                    }
+                  , onChange: function (e) { ee.emit('swing-change', [e.target.value]) }
                   }
                 )
               )
@@ -143,3 +113,4 @@ module.exports = react.createClass(
     }
   }
 )
+module.exports.on = ee.on.bind(ee)

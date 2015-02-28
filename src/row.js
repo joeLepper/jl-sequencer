@@ -5,11 +5,11 @@ var react = require('react')
 module.exports = react.createClass(
   { componentDidMount: function () {
       var self = this
-      self.props.ee.emit('register-row', [self.props.sampleName])
+      self.props.ee.emit('register-row', [self.props.eventName])
     }
   , componentWillUnmount: function () {
       var self = this
-      self.props.ee.emit('remove-row', [self.props.sampleName])
+      self.props.ee.emit('remove-row', [self.props.eventName])
     }
   , render: function () {
       var self = this
@@ -19,7 +19,7 @@ module.exports = react.createClass(
         buttons.push(button(
           { ee: self.props.ee
           , row: self.props.row
-          , sampleName: self.props.sampleName
+          , eventName: self.props.eventName
           , column: i
           , litForNow: self.props.currentBeat === i
           }

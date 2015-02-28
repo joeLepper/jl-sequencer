@@ -30,13 +30,9 @@ var initialBpm = 120
   , ac = new AudioContext()
   , clock = Scheduler(ac, { ee: ee, bpm: initialBpm})
   , props = (
-      { ac: ac
-      , audioSrc: 'TR808WAV'
-      , beats: 16
+      { beats: 16
       , clock: clock
-      , ee: ee
       , initialBpm: initialBpm
-      , io: io
       , rows: rows
       }
     )
@@ -47,55 +43,24 @@ react.renderComponent(sequencer(props), container)
 Properties
 ----------
 
-- **ac**: 
-A new `AudioContext` object which is used to time and - if this is an audio sequencer - play samples.
-
-- **audioSrc (optional)**: 
-A string indicating the directory from which samples should be fetched. If this isn't an audio sequencer, leave this undefined.
-
-- **beats**: 
+- **beats**:
 The number of beats in a loop. 16 is a nice round number that gets you 4 bars of 4 beats.
 
-- **clock**: 
+- **clock**:
 The sequencer expects a `beat-scheduler` to publish `next-tick` events to it which use time values from the same `AudioContext`. If you can replicate that behavior, anything emits that event on the shared event emitter ought to do.
 
-- **ee**: 
-An event emitter. This is the main mode of communication between the clock and the sequencer. In a future version we should probably just make the clock emit these events directly.
-
-- **initialBpm**: 
+- **initialBpm**:
 Initial beats per minute for the sequencer to cycle at.
 
-- **io**: 
-A socket for communication between the sequencer and its child pages. See more about how the socket and a sequencer's child pages work below.
+- **rows**:
+An array. Each item in the array should be a unique string. The length of this array will determine the number of rows in the sequencer.
 
-- **rows**: 
-An array. Each item in the array should be the name of a sample. These will be the files that the sequencer tries to fetch from the `audioSrc`. The length of this array will determine the number of rows in the sequencer.
-
-Sockets
--------
-
-Each sequencer reserves its own channel in socket and displays that to the user via a GUID.
-
-Upon instantiation the sequencer will emit an `init` event. The server should respond with an `init-ack` acknowledgement. That acknowledgement should transmit the sequencer's GUID. Child pages can use this GUID to subscribe to the sequencer's events.
-
-Currently the sequencer emits (perhaps poorly-named) `glitch` events on the socket. In the future this should probably just be a `beat` event.
-
-Child pages
------------
-
-Child pages respond to a sequencer's events. A child page should join a sequencer by publishing a `join-room` event with the proper GUID. After successfully joining a sequencer, the child page will begin receiving (perhaps poorly-named) `glitch` events. See below for more about `glitch` events.
 
 Emitted events
 --------------
 
-- **init**: 
-Published upon initialization of a sequencer. Really gets the ball rolling, y'know.
+- **schedule [scheduleEventArray]**:
+An array of `scheduleEvent` objects is broadcast. Each object has a `name`, `beat`, and `state`. `beat` is a moment in the future that can be used to schedule against an `audioContext`.
 
-- **glitch [activate, index]**: 
-`activate` or de`activate` the glitch at `index`, child.
-
-Subscribed events
------------------
-
-- **init-ack [guid]**: 
-The server acknowledges that the sequencer has successfully created the room represented by `guid`. Child pages may subscribe to it there.
+- **register-row [name]**
+The `register-row` event notifies listeners that a row has been initialized. It somes with a unique string to identify it. This maps to the strings handed in with the initial rows, and can be used to store the name of a file.

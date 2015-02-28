@@ -24,7 +24,7 @@ module.exports = react.createClass(
       var self = this
         , row = self.props.row
         , column = self.props.column
-        , sampleName = self.props.sampleName
+        , eventName = self.props.eventName
 
       var className = 'note-button'
       if (self.props.litForNow) className += ' lit'
@@ -33,7 +33,7 @@ module.exports = react.createClass(
       return d.button(
         { className: className
         , onClick: function () {
-            self.props.ee.emit('note-button-click', [column, row, sampleName])
+            self.props.ee.emit('note-button-click', [column, row, eventName])
           }
         }
       )
